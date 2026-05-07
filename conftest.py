@@ -5,12 +5,19 @@ from selenium.webdriver.chrome.options import Options
 @pytest.fixture
 def driver():
     options = Options()
-    options.add_argument("--incognito")
-    options.add_argument("--start-maximized")
+
+    # 🔥 THIS LINE IS THE REAL FIX
+    options.add_argument("--guest")
+
+    # extra safety
+    options.add_argument("--disable-notifications")
+    options.add_experimental_option("prefs", {
+        "credentials_enable_service": False,
+        "profile.password_manager_enabled": False
+    })
 
     driver = webdriver.Chrome(options=options)
-    driver.implicitly_wait(5)
+    driver.maximize_window()
 
     yield driver
-
     driver.quit()
