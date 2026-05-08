@@ -17,7 +17,6 @@ def driver():
     })
 
     driver = webdriver.Chrome(options=options)
-    driver.maximize_window()
 
     yield driver
     driver.quit()
