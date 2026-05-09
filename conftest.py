@@ -1,22 +1,29 @@
 import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+
 
 @pytest.fixture
 def driver():
-    options = Options()
-
-    # 🔥 THIS LINE IS THE REAL FIX
-    options.add_argument("--guest")
-
-    # extra safety
-    options.add_argument("--disable-notifications")
-    options.add_experimental_option("prefs", {
-        "credentials_enable_service": False,
-        "profile.password_manager_enabled": False
-    })
-
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome()
 
     yield driver
+
     driver.quit()
+
+import os
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == "call" and report.failed:
+        driver = item.funcargs.get("driver")
+
+        if driver:
+            os.makedirs("screenshots", exist_ok=True)
+
+            screenshot_name = f"screenshots/{item.name}.png"
+
+            driver.save_screenshot(screenshot_name)
